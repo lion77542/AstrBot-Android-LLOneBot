@@ -638,9 +638,8 @@ class HomeController extends GetxController {
     // 从持久化存储加载自定义 WebView 列表
     _loadCustomWebViews();
 
-    // 品牌开屏页（首次启动显示）
-    // 性能设置（每次启动都弹）
-    Future.delayed(Duration.zero, () async {
+      // 品牌开屏页（首次启动显示）
+      // 性能设置（每次启动都弹）
       await Future.delayed(const Duration(milliseconds: 300));
       if (!mounted) return;
       final performance = await Get.to<Map<String, bool>>(const PerformancePromptPage());
@@ -649,16 +648,14 @@ class HomeController extends GetxController {
         sustainedPerformance.set(performance['sustainedPerformance'] ?? false);
         applyPerformanceSettings();
       }
-    });
 
-      // 加载并启动 AstrBot
-      loadAstrBot();
+    // 加载并启动 AstrBot
+    loadAstrBot();
 
-      // 在终端创建完成后初始化固定标签页
-      // 等待terminal创建完成
-      Future.delayed(const Duration(milliseconds: 500), () {
-        terminalTabManager.initializeFixedTab(terminal);
-      });
+    // 在终端创建完成后初始化固定标签页
+    // 等待terminal创建完成
+    Future.delayed(const Duration(milliseconds: 500), () {
+      terminalTabManager.initializeFixedTab(terminal);
     });
 
     // 监听应用生命周期状态变化
