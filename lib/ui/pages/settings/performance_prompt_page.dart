@@ -8,8 +8,6 @@ class PerformancePromptPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetBuilder<HomeController>(builder: (homeController) {
-      bool bigCore = homeController.bigCoreAffinity.get() ?? false;
-      bool sustained = homeController.sustainedPerformance.get() ?? false;
       return Scaffold(
         backgroundColor: const Color(0xFF1a1a2e),
         body: SafeArea(
@@ -44,7 +42,7 @@ class PerformancePromptPage extends StatelessWidget {
                     Icons.speed,
                     '绑定处理器大核',
                     '将应用线程调度到 CPU 高性能核心，可能增加发热与功耗',
-                    bigCore,
+                    homeController.bigCoreAffinity.get() ?? false,
                         (v) => homeController.bigCoreAffinity.set(v),
                   ),
                   const SizedBox(height: 16),
@@ -52,7 +50,7 @@ class PerformancePromptPage extends StatelessWidget {
                     Icons.bolt,
                     '性能模式',
                     '请求系统持续高性能模式，可能增加发热与功耗',
-                    sustained,
+                    homeController.sustainedPerformance.get() ?? false,
                         (v) => homeController.sustainedPerformance.set(v),
                   ),
                   const SizedBox(height: 32),
@@ -61,7 +59,6 @@ class PerformancePromptPage extends StatelessWidget {
                     height: 48,
                     child: ElevatedButton(
                       onPressed: () {
-                        homeController.applyPerformanceSettings();
                         Get.back(result: {
                           'bigCoreAffinity': homeController.bigCoreAffinity.get() ?? false,
                           'sustainedPerformance': homeController.sustainedPerformance.get() ?? false,
