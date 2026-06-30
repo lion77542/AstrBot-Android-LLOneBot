@@ -1,7 +1,7 @@
 allprojects {
     repositories {
-        // google()
-        // jcenter()
+        google()
+        mavenCentral()
         maven { url 'https://storage.flutter-io.cn/repository/google' }
         maven { url 'https://storage.flutter-io.cn/repository/jcenter' }
         maven { url 'https://storage.flutter-io.cn/repository/public' }
