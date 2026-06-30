@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:ui';
 import 'dart:io';
 import 'package:get/get.dart';
+import 'package:flutter_pty/flutter_pty.dart';
 import 'package:global_repository/global_repository.dart';
 import 'package:settings/settings.dart';
 import 'package:xterm/xterm.dart';
@@ -10,6 +11,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/config/app_config.dart';
 import '../../generated/l10n.dart';
+import '../pages/settings/performance_prompt_page.dart';
 import '../../core/constants/scripts.dart';
 import '../../core/utils/file_utils.dart';
 import '../../core/utils/big_core_affinity.dart';

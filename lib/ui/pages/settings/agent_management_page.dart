@@ -42,7 +42,7 @@ class _AgentManagementPageState extends State<AgentManagementPage> {
 
     // Send command with marker
     final fullCmd = '$cmd && echo "$marker"';
-    homeController.pseudoTerminal!.write('$fullCmd\n'.toUtf8());
+    homeController.pseudoTerminal!.write(utf8.encode('$fullCmd\n'));
 
     _outputSubscription = homeController.pseudoTerminal!.output
          .transform(Utf8Decoder(allowMalformed: true))
