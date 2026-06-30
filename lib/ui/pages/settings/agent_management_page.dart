@@ -41,12 +41,11 @@ class _AgentManagementPageState extends State<AgentManagementPage> {
 
     // Send command with marker
     final fullCmd = '$cmd && echo "$marker"';
-    homeController.pseudoTerminal!.writeString('$fullCmd\n');
+    homeController.pseudoTerminal!.write('$fullCmd\n'.toUtf8());
 
     _outputSubscription = homeController.pseudoTerminal!.output
-        .cast<List<int>>()
         .transform(const Utf8Decoder(allowMalformed: true))
-        .listen((event) {
+        .listen((String event) {
       // Skip if it contains the marker
       if (event.contains(marker)) {
         if (!completer.isCompleted) {

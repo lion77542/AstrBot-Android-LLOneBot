@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:global_repository/global_repository.dart';
 import '../../controllers/terminal_controller.dart';
 
 class PerformanceSettingsPage extends StatefulWidget {

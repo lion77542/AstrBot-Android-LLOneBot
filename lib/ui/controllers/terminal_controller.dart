@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:ui';
 import 'dart:io';
 import 'package:flutter_pty/flutter_pty.dart';
 import 'package:get/get.dart';
@@ -26,8 +27,6 @@ class HomeController extends GetxController {
   SettingNode sustainedPerformance = 'sustained_performance'.setting;
   SettingNode llbotWebUiEnabled = 'llbot_webui_enabled'.setting;
   SettingNode showTerminalWhiteText = 'show_terminal_white_text'.setting;
-  SettingNode bigCoreAffinity = 'big_core_affinity'.setting;
-  SettingNode sustainedPerformance = 'sustained_performance'.setting;
   Pty? pseudoTerminal;
   Pty? llbotTerminal;
 

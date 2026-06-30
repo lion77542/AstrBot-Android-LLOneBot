@@ -132,9 +132,7 @@ class _LLBotIntroPageState extends State<LLBotIntroPage> {
                   height: 48,
                   child: ElevatedButton(
                     onPressed: () {
-                      if (widget.onPerformanceConfirm != null) {
-                        widget.onPerformanceConfirm!(_bigCoreAffinity, _sustainedPerformance);
-                      }
+                      // Performance settings moved to performance prompt page
                       setState(() => _showPrivacy = true);
                     },
                     style: ElevatedButton.styleFrom(
