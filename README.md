@@ -1,5 +1,5 @@
 # AstrBot Android LLOneBot 版
-我们正在修改代码 所以程序不太可用 当我们完成代码并测试可用之后 您将会不再看见这条通知！
+
 > 🤖 将你的 QQ 号变成 AI 机器人 — 基于 LLBot (幸运莉莉娅) 的 AstrBot 安卓 App
 
 本项目是基于 [AstrBot-Android-App](https://github.com/zz6zz666/AstrBot-Android-App) 的深度改造版，核心变更：
@@ -26,6 +26,9 @@
 - ✅ **更流畅** — WebView 滚动卡顿已修复
 - ✅ **兼容性更好** — 修复仪表盘白屏、git 克隆失败等问题
 - ✅ **品牌开屏页** — 首次启动显示改版品牌界面和隐私协议
+- ✅ **多 Agent 后台管理** — 在 App 内可视化管理 OpenClaw/Hermes 等多 agent，支持启停、日志、开机自启
+- ✅ **性能模式** — 大核绑定 + 持续性能模式，proot 容器资源限制（ulimit 2GB / 65535 FD）
+- ✅ **proot 精简** — 移除 /sys 挂载，减少 syscall 开销，提升容器稳定性
 
 ### 🛠 已修复的上游 Bug
 
