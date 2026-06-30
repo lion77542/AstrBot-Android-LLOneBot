@@ -12,6 +12,7 @@ import '../../core/config/app_config.dart';
 import '../../generated/l10n.dart';
 import '../../core/constants/scripts.dart';
 import '../../core/utils/file_utils.dart';
+import '../../core/utils/big_core_affinity.dart';
 import '../routes/app_routes.dart';
 import '../pages/intro/intro_page.dart';
 import 'terminal_tab_manager.dart';
@@ -23,6 +24,8 @@ class HomeController extends GetxController {
   SettingNode privacySetting = 'privacy'.setting;
   SettingNode llbotWebUiEnabled = 'llbot_webui_enabled'.setting;
   SettingNode showTerminalWhiteText = 'show_terminal_white_text'.setting;
+  SettingNode bigCoreAffinity = 'big_core_affinity'.setting;
+  SettingNode sustainedPerformance = 'sustained_performance'.setting;
   Pty? pseudoTerminal;
   Pty? llbotTerminal;
 
@@ -636,16 +639,17 @@ class HomeController extends GetxController {
     _loadCustomWebViews();
 
     // 品牌开屏页（首次启动显示）
-    // 展示改版信息和隐私协议
+    // 性能设置（每次启动都弹）
     Future.delayed(Duration.zero, () async {
-      if (privacySetting.get() == null) {
-        await Get.to(LLBotIntroPage(
-          onContinue: () {
-            privacySetting.set(true);
-            Get.back();
-          },
-        ));
+      await Future.delayed(const Duration(milliseconds: 300));
+      if (!mounted) return;
+      final performance = await Get.to<Map<String, bool>>(const PerformancePromptPage());
+      if (performance != null) {
+        bigCoreAffinity.set(performance['bigCoreAffinity'] ?? false);
+        sustainedPerformance.set(performance['sustainedPerformance'] ?? false);
+        applyPerformanceSettings();
       }
+    });
 
       // 加载并启动 AstrBot
       loadAstrBot();
@@ -730,6 +734,25 @@ class HomeController extends GetxController {
   void setShowTerminalWhiteText(bool value) {
     showTerminalWhiteText.set(value);
     showTerminalWhiteTextRx.value = value;
+  }
+
+  // 应用性能设置
+  Future<void> applyPerformanceSettings() async {
+    try {
+      final bool bigCore = bigCoreAffinity.get() ?? false;
+      final bool sustained = sustainedPerformance.get() ?? false;
+      // 绑定大核
+      if (bigCore) {
+        BigCoreAffinity.apply(0);
+      }
+      // 性能模式
+      final MethodChannel channel = MethodChannel('com.llbot.performance');
+      await channel.invokeMethod('apply', {
+        'sustainedPerformance': sustained,
+      });
+    } catch (e) {
+      Log.e('applyPerformanceSettings failed: $e', tag: 'Performance');
+    }
   }
 
   @override

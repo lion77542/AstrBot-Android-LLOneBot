@@ -1,4 +1,4 @@
-VERSION='1.1.0'
-VERSION_CODE='24'
-APP_NAME='AstrBot Android'
-APP_NAME_CN='AstrBot Android'
+VERSION='1.6.0'
+VERSION_CODE='25'
+APP_NAME='AstrBot-LLOneBot'
+APP_NAME_CN='AstrBot-LLOneBot'

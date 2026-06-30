@@ -48,4 +48,9 @@ class Config {
       'url': 'https://hub.gitmirror.com',
     },
   ];
+
+  // 本地服务地址配置
+  static const String astrBotLocalBaseUrl = 'http://127.0.0.1:6185';
+  static const String llBotLocalBaseUrl = 'http://127.0.0.1:3080';
+  static const String llBotWebUiPath = '/webui';
 }

@@ -4,9 +4,9 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:global_repository/global_repository.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:flutter/services.dart';
-import '../../core/config/app_config.dart';
+import '../../../core/config/app_config.dart';
 
-/// AstrBot Android LLOneBot 版 — 改版开屏品牌页面
+/// AstrBot-LLOneBot 改版开屏品牌页面
 /// 展示改版信息后再进入隐私协议
 class LLBotIntroPage extends StatefulWidget {
   final VoidCallback onContinue;
@@ -70,7 +70,7 @@ class _LLBotIntroPageState extends State<LLBotIntroPage> {
                 const SizedBox(height: 24),
                 // 标题
                 const Text(
-                  'AstrBot Android',
+                  'AstrBot-LLOneBot',
                   style: TextStyle(
                     fontSize: 28,
                     fontWeight: FontWeight.bold,
@@ -119,7 +119,7 @@ class _LLBotIntroPageState extends State<LLBotIntroPage> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  '基于 AstrBot-Android-App 深度改造',
+                  '由 lion77542 基于上游深度改造',
                   style: TextStyle(
                     fontSize: 12,
                     color: Colors.white.withOpacity(0.3),
@@ -131,7 +131,12 @@ class _LLBotIntroPageState extends State<LLBotIntroPage> {
                   width: double.infinity,
                   height: 48,
                   child: ElevatedButton(
-                    onPressed: () => setState(() => _showPrivacy = true),
+                    onPressed: () {
+                      if (widget.onPerformanceConfirm != null) {
+                        widget.onPerformanceConfirm!(_bigCoreAffinity, _sustainedPerformance);
+                      }
+                      setState(() => _showPrivacy = true);
+                    },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.amber,
                       foregroundColor: Colors.black,
@@ -168,6 +173,33 @@ class _LLBotIntroPageState extends State<LLBotIntroPage> {
               color: Colors.white.withOpacity(0.85),
             ),
           ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSwitchRow(IconData icon, String title, String summary, bool value, ValueChanged<bool> onChanged) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(icon, size: 20, color: Colors.amber),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(title, style: const TextStyle(fontSize: 14, color: Colors.white)),
+              const SizedBox(height: 2),
+              Text(summary, style: TextStyle(fontSize: 12, color: Colors.white.withOpacity(0.6))),
+            ],
+          ),
+        ),
+        Switch(
+          value: value,
+          onChanged: onChanged,
+          activeColor: Colors.amber,
+          inactiveThumbColor: Colors.white70,
+          inactiveTrackColor: Colors.white24,
         ),
       ],
     );
