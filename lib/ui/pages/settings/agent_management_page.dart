@@ -54,7 +54,7 @@ class _AgentManagementPageState extends State<AgentManagementPage> {
         }
         return;
       }
-      responses.add(event);
+      responses.add(String.fromCharCodes(event));
     });
 
     // Timeout after 5 seconds
