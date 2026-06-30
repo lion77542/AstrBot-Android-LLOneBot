@@ -15,7 +15,7 @@ class _AgentManagementPageState extends State<AgentManagementPage> {
   final HomeController homeController = Get.find<HomeController>();
   List<Map<String, String>> _agents = [];
   bool _loading = true;
-  StreamSubscription<String>? _outputSubscription;
+  StreamSubscription<dynamic>? _outputSubscription;
 
   @override
   void initState() {
@@ -45,7 +45,7 @@ class _AgentManagementPageState extends State<AgentManagementPage> {
     homeController.pseudoTerminal!.write(utf8.encode('$fullCmd\n'));
 
     _outputSubscription = homeController.pseudoTerminal!.output
-         .transform(Utf8Decoder(allowMalformed: true))
+         
         .listen((event) {
       // Skip if it contains the marker
       if (event.contains(marker)) {

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:ui';
+import 'dart:services';
 import 'dart:io';
 import 'package:get/get.dart';
 import 'package:flutter_pty/flutter_pty.dart';
