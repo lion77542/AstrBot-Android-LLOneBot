@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:ui';
 import 'dart:io';
-import 'package:flutter_pty/flutter_pty.dart';
 import 'package:get/get.dart';
 import 'package:global_repository/global_repository.dart';
 import 'package:settings/settings.dart';
@@ -642,7 +641,7 @@ class HomeController extends GetxController {
     // 性能设置（首次启动显示）
     // 最前面的弹窗，在隐私协议之前
     Future.delayed(Duration.zero, () async {
-      final performance = await Get.to<Map<String, bool>>(const PerformancePromptPage());
+      final performance = await Get.to<Map<String, bool>>(PerformancePromptPage());
       if (performance != null) {
         bigCoreAffinity.set(performance['bigCoreAffinity'] ?? false);
         sustainedPerformance.set(performance['sustainedPerformance'] ?? false);

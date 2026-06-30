@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../controllers/terminal_controller.dart';
@@ -44,8 +45,8 @@ class _AgentManagementPageState extends State<AgentManagementPage> {
     homeController.pseudoTerminal!.write('$fullCmd\n'.toUtf8());
 
     _outputSubscription = homeController.pseudoTerminal!.output
-        .transform(const Utf8Decoder(allowMalformed: true))
-        .listen((String event) {
+         .transform(Utf8Decoder(allowMalformed: true))
+        .listen((event) {
       // Skip if it contains the marker
       if (event.contains(marker)) {
         if (!completer.isCompleted) {
