@@ -1,10 +1,14 @@
 import 'package:get/get.dart';
 import '../pages/terminal/terminal_page.dart';
 import '../pages/webview/webview_page.dart';
+import '../pages/settings/performance_settings_page.dart';
+import '../pages/settings/agent_management_page.dart';
 
 class AppRoutes {
   static const String terminal = '/terminal';
   static const String webview = '/webview';
+  static const String performanceSettings = '/performance_settings';
+  static const String agentManagement = '/agent_management';
 
   static final routes = [
     GetPage(
@@ -15,6 +19,14 @@ class AppRoutes {
       name: webview,
       page: () => const WebViewPage(),
       transition: Transition.fadeIn,
+    ),
+    GetPage(
+      name: performanceSettings,
+      page: () => const PerformanceSettingsPage(),
+    ),
+    GetPage(
+      name: agentManagement,
+      page: () => const AgentManagementPage(),
     ),
   ];
 }

@@ -13,6 +13,7 @@ import '../../controllers/terminal_controller.dart';
 import '../../../core/constants/scripts.dart' as scripts;
 import '../../../core/services/password_manager.dart';
 import '../../../core/config/app_config.dart';
+import './agent_management_page.dart';
 
 class SettingsPage extends StatefulWidget {
   final WebViewController astrBotController;
@@ -1593,6 +1594,14 @@ class _SettingsPageState extends State<SettingsPage> {
             '内置 Ubuntu 文件系统已挂载至 \'文件\'\n可添加至 MT 文件管理器侧栏以快捷访问',
           ),
           onTap: () => _openFileManager(),
+        ),
+        ListTile(
+          leading: const Icon(Icons.smart_toy),
+          title: const Text('Agent 管理'),
+          subtitle: const Text('管理后台运行的 Agent（OpenClaw/Hermes 等）'),
+          onTap: () {
+            Get.to(() => const AgentManagementPage());
+          },
         ),
         ListTile(
           leading: const Icon(Icons.delete_outline),

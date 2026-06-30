@@ -468,13 +468,16 @@ login_ubuntu(){
     ANDROID_TZ="UTC"
   fi
 
+  # 资源限制：防止容器 OOM 或文件描述符耗尽
+  ulimit -v 2097152 2>/dev/null  # 虚拟内存限制 2GB
+  ulimit -n 65535 2>/dev/null    # 文件描述符限制
+
   exec $BIN/proot \
     -0 \
     -r "$UBUNTU_PATH" \
     --link2symlink \
     -b /dev \
     -b /proc \
-    -b /sys \
     -b /dev/pts \
     -b "$TMPDIR":"$TMPDIR" \
     -b "$TMPDIR":/dev/shm \

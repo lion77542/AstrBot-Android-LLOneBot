@@ -499,6 +499,153 @@ install_astrbot(){
 
 }
 
+# ============================================
+# Agent Management Functions (多 agent 并行/后台运行)
+# ============================================
+
+AGENT_DIR="$HOME/agents"
+AGENT_LOG_DIR="$AGENT_DIR/logs"
+AGENT_PID_DIR="$AGENT_DIR/pids"
+AGENT_AUTOSTART_DIR="$AGENT_DIR/autostart"
+
+init_agent_dirs() {
+  mkdir -p "$AGENT_DIR" "$AGENT_LOG_DIR" "$AGENT_PID_DIR" "$AGENT_AUTOSTART_DIR"
+}
+
+# 启动一个后台 agent
+# 用法: start_agent <name> <command>
+# 例: start_agent openclaw "cd /root/openclaw && python main.py"
+start_agent() {
+  local name="$1"
+  shift
+  local cmd="$*"
+
+  init_agent_dirs
+
+  local pid_file="$AGENT_PID_DIR/${name}.pid"
+  local log_file="$AGENT_LOG_DIR/${name}.log"
+
+  # 检查是否已在运行
+  if [ -f "$pid_file" ]; then
+    local pid=$(cat "$pid_file" 2>/dev/null)
+    if [ -n "$pid" ] && kill -0 "$pid" 2>/dev/null; then
+      echo "Agent '$name' 已在运行 (PID: $pid)"
+      return 1
+    else
+      rm -f "$pid_file"
+    fi
+  fi
+
+  # 后台启动
+  nohup bash -c "$cmd" >> "$log_file" 2>&1 &
+  local pid=$!
+  echo "$pid" > "$pid_file"
+  echo "Agent '$name' 已启动 (PID: $pid, 日志: $log_file)"
+}
+
+# 停止一个后台 agent
+# 用法: stop_agent <name>
+stop_agent() {
+  local name="$1"
+  local pid_file="$AGENT_PID_DIR/${name}.pid"
+
+  if [ ! -f "$pid_file" ]; then
+    echo "Agent '$name' 未在运行"
+    return 1
+  fi
+
+  local pid=$(cat "$pid_file" 2>/dev/null)
+  if [ -n "$pid" ] && kill -0 "$pid" 2>/dev/null; then
+    kill "$pid" 2>/dev/null
+    sleep 1
+    # 强制杀掉残留进程
+    kill -0 "$pid" 2>/dev/null && kill -9 "$pid" 2>/dev/null
+    rm -f "$pid_file"
+    echo "Agent '$name' 已停止"
+  else
+    echo "Agent '$name' 未在运行 (PID 文件过期)"
+    rm -f "$pid_file"
+  fi
+}
+
+# 查看所有 agent 状态
+agent_status() {
+  init_agent_dirs
+  echo "=== Agent 状态 ==="
+  for pid_file in "$AGENT_PID_DIR"/*.pid; do
+    [ -f "$pid_file" ] || continue
+    local name=$(basename "$pid_file" .pid)
+    local pid=$(cat "$pid_file" 2>/dev/null)
+    if [ -n "$pid" ] && kill -0 "$pid" 2>/dev/null; then
+      echo "  [运行中] $name (PID: $pid)"
+    else
+      echo "  [已停止] $name (过期 PID: $pid)"
+    fi
+  done
+  echo "=================="
+}
+
+# 查看 agent 日志
+# 用法: agent_logs <name> [行数]
+agent_logs() {
+  local name="$1"
+  local lines="${2:-50}"
+  local log_file="$AGENT_LOG_DIR/${name}.log"
+
+  if [ ! -f "$log_file" ]; then
+    echo "Agent '$name' 无日志文件"
+    return 1
+  fi
+
+  tail -n "$lines" "$log_file"
+}
+
+# 自动启动配置的 agent（在 AstrBot 启动后调用）
+auto_start_agents() {
+  init_agent_dirs
+  if [ -d "$AGENT_AUTOSTART_DIR" ]; then
+    for agent_script in "$AGENT_AUTOSTART_DIR"/*; do
+      if [ -f "$agent_script" ]; then
+        local agent_name=$(basename "$agent_script" .sh)
+        echo "自动启动 agent: $agent_name"
+        start_agent "$agent_name" "bash $agent_script"
+      fi
+    done
+  fi
+}
+
+# 注册 agent 为开机自启
+# 用法: agent_autostart <name> <command>
+# 例: agent_autostart openclaw "cd /root/openclaw && python main.py"
+agent_autostart() {
+  local name="$1"
+  shift
+  local cmd="$*"
+
+  init_agent_dirs
+  local autostart_file="$AGENT_AUTOSTART_DIR/${name}.sh"
+
+  echo "#!/bin/bash" > "$autostart_file"
+  echo "# Auto-generated agent autostart script" >> "$autostart_file"
+  echo "$cmd" >> "$autostart_file"
+  chmod +x "$autostart_file"
+
+  echo "Agent '$name' 已注册为开机自启"
+}
+
+# 取消 agent 开机自启
+agent_no_autostart() {
+  local name="$1"
+  local autostart_file="$AGENT_AUTOSTART_DIR/${name}.sh"
+
+  if [ -f "$autostart_file" ]; then
+    rm -f "$autostart_file"
+    echo "Agent '$name' 已取消开机自启"
+  else
+    echo "Agent '$name' 未设置开机自启"
+  fi
+}
+
 install_sudo_curl_git
 bump_progress
 bump_progress
