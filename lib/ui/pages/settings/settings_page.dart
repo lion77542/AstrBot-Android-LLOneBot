@@ -1577,17 +1577,17 @@ class _SettingsPageState extends State<SettingsPage> {
         ),
         ListTile(
           leading: const Icon(Icons.web),
-          title: const Text('NapCat WebUI'),
-          subtitle: const Text('显示或隐藏 NapCat 网页控制面板（默认隐藏）'),
+          title: const Text('LLBot WebUI'),
+          subtitle: const Text('显示或隐藏 LLBot 网页控制面板（默认隐藏）'),
           trailing: Switch(
-            value: homeController.napCatWebUiEnabled.get() ?? false,
+            value: homeController.llbotWebUiEnabled.get() ?? false,
             onChanged: (bool value) {
               // 使用新的方法来同步更新响应式变量
-              homeController.setNapCatWebUiEnabled(value);
+              homeController.setLLBotWebUiEnabled(value);
 
               Get.snackbar(
                 value ? 'WebUI 已启用' : 'WebUI 已禁用',
-                value ? 'NapCat 标签页已显示，可以立即访问控制面板' : 'NapCat 标签页已隐藏',
+                value ? 'LLBot 标签页已显示，可以立即访问控制面板' : 'LLBot 标签页已隐藏',
                 snackPosition: SnackPosition.BOTTOM,
                 duration: const Duration(seconds: 2),
               );
@@ -1595,10 +1595,10 @@ class _SettingsPageState extends State<SettingsPage> {
           ),
         ),
         Obx(() {
-          final token = homeController.napCatWebUiToken.value;
+          final token = homeController.llbotWebUiToken.value;
           return ListTile(
             leading: const Icon(Icons.vpn_key),
-            title: const Text('NapCat 登录 token'),
+            title: const Text('LLBot 登录 token'),
             subtitle: Text(token.isEmpty ? '暂未获取到token' : token),
             onTap: token.isEmpty
                 ? null

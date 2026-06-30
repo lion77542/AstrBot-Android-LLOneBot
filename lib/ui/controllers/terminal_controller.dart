@@ -663,6 +663,7 @@ class HomeController extends GetxController {
 
       // 加载并启动 AstrBot
       loadAstrBot();
+    }); // 关闭 Future.delayed(Duration.zero)
 
     // 在终端创建完成后初始化固定标签页
     // 等待terminal创建完成

@@ -671,7 +671,7 @@ class _WebViewPageState extends State<WebViewPage> {
               const TerminalTabView(),
               SettingsPage(
                 astrBotController: _astrBotController,
-                llbotController: _llBotController,
+                napCatController: _llBotController,
                 onNavigate: (index) => setState(() => _currentIndex = index),
               ),
             ],
