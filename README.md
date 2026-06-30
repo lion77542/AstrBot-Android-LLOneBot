@@ -1,5 +1,5 @@
 # AstrBot Android LLOneBot 版
-
+我们正在修改代码 所以程序不太可用 当我们完成代码并测试可用之后 您将会不再看见这条通知！
 > 🤖 将你的 QQ 号变成 AI 机器人 — 基于 LLBot (幸运莉莉娅) 的 AstrBot 安卓 App
 
 本项目是基于 [AstrBot-Android-App](https://github.com/zz6zz666/AstrBot-Android-App) 的深度改造版，核心变更：
