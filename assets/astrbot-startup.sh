@@ -150,10 +150,34 @@ install_uv(){
 }
 
 install_llbot(){
-  LLBOT_VERSION="v7.12.15"
   LLBOT_DIR="$HOME/llbot"
   LLBOT_ZIP="LLBot-CLI-linux-arm64.zip"
-  LLBOT_URL="https://github.com/LLOneBot/LuckyLilliaBot/releases/download/$LLBOT_VERSION/$LLBOT_ZIP"
+  # LLBot 镜像源列表（含官方+镜像，自动轮询可用者）
+  LLBOT_MIRRORS=(
+    "https://github.com/LLOneBot/LuckyLilliaBot/releases/download"
+    "https://ghfast.top/https://github.com/LLOneBot/LuckyLilliaBot/releases/download"
+    "https://gh-proxy.com/https://github.com/LLOneBot/LuckyLilliaBot/releases/download"
+    "https://mirror.ghproxy.com/https://github.com/LLOneBot/LuckyLilliaBot/releases/download"
+    "https://hub.gitmirror.com/https://github.com/LLOneBot/LuckyLilliaBot/releases/download"
+  )
+
+  # 自动检测最新 LLBot 版本（先从镜像源尝试，避免被墙）
+  detect_llbot_version() {
+    local api_mirrors=(
+      "https://api.github.com/repos/LLOneBot/LuckyLilliaBot/releases/latest"
+      "https://ghfast.top/https://api.github.com/repos/LLOneBot/LuckyLilliaBot/releases/latest"
+      "https://gh-proxy.com/https://api.github.com/repos/LLOneBot/LuckyLilliaBot/releases/latest"
+    )
+    for api_url in "${api_mirrors[@]}"; do
+      local ver=$(curl -sL --connect-timeout 10 "$api_url" 2>/dev/null | grep '"tag_name"' | cut -d'"' -f4)
+      if [ -n "$ver" ]; then
+        echo "$ver"
+        return 0
+      fi
+    done
+    echo "v7.12.15"  # fallback 硬编码版本
+    return 1
+  }
 
   if [ ! -f "$LLBOT_DIR/llbot" ]; then
     progress_echo "LLBot $L_NOT_INSTALLED，$L_INSTALLING..."
@@ -174,18 +198,52 @@ install_llbot(){
     mkdir -p $LLBOT_DIR
     cd $LLBOT_DIR
 
-    echo "LLBot $L_NOT_INSTALLED，$L_INSTALLING..."
-    network_test
-    DOWNLOAD_URL="${target_proxy:+${target_proxy}/}$LLBOT_URL"
+    # 检测最新版本
+    LLBOT_VERSION=$(detect_llbot_version)
+    echo "LLBot 最新版本: $LLBOT_VERSION"
 
-    if ! curl -fL $DOWNLOAD_URL -o llbot.zip; then
-      echo "下载 LLBot 失败"
+    progress_echo "LLBot $L_NOT_INSTALLED，$L_INSTALLING..."
+
+    # 多镜像源轮询下载 LLBot
+    DOWNLOAD_SUCCESS=0
+    for mirror in "${LLBOT_MIRRORS[@]}"; do
+      local url="$mirror/$LLBOT_VERSION/$LLBOT_ZIP"
+      echo "尝试下载: $url"
+      if curl -fL --connect-timeout 15 --max-time 120 "$url" -o llbot.zip 2>/dev/null; then
+        # 检查 ZIP 是否有效
+        if unzip -t llbot.zip >/dev/null 2>&1; then
+          echo "下载成功: $mirror"
+          DOWNLOAD_SUCCESS=1
+          break
+        else
+          echo "下载文件损坏，尝试下一个镜像"
+          rm -f llbot.zip
+        fi
+      else
+        echo "下载失败，尝试下一个镜像"
+      fi
+    done
+
+    if [ "$DOWNLOAD_SUCCESS" -eq 0 ]; then
+      echo "所有镜像下载 LLBot 均失败，正在重试官方源..."
+      for retry in 1 2 3; do
+        if curl -fL --connect-timeout 15 --max-time 120 "https://github.com/LLOneBot/LuckyLilliaBot/releases/download/$LLBOT_VERSION/$LLBOT_ZIP" -o llbot.zip; then
+          DOWNLOAD_SUCCESS=1
+          break
+        fi
+        sleep 5
+      done
+    fi
+
+    if [ "$DOWNLOAD_SUCCESS" -eq 0 ]; then
+      echo "下载 LLBot 失败，请检查网络连接"
       exit 1
     fi
 
     echo "正在解压 LLBot..."
     if ! unzip -o llbot.zip; then
       echo "解压 LLBot 失败"
+      rm -f llbot.zip
       exit 1
     fi
     rm -f llbot.zip

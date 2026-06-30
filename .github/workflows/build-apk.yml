@@ -38,6 +38,6 @@ jobs:
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: apk-release
+          name: AstrBot-Android-LLOneBot-apk
           path: build/app/outputs/flutter-apk/*.apk
-          retention-days: 7
+          retention-days: 30

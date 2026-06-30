@@ -13,6 +13,7 @@ import '../../generated/l10n.dart';
 import '../../core/constants/scripts.dart';
 import '../../core/utils/file_utils.dart';
 import '../routes/app_routes.dart';
+import '../pages/intro/intro_page.dart';
 import 'terminal_tab_manager.dart';
 
 class HomeController extends GetxController {
@@ -322,14 +323,23 @@ class HomeController extends GetxController {
         }
       }
 
-      // 捕获 LLBot WebUI Token（LLBot 可能打印 token）
-      if (event.contains('WebUI:')) {
-        final match = RegExp(r'WebUi Token:\s+(\w+)').firstMatch(event);
-        if (match != null) {
-          final token = match.group(1);
-          if (token != null) {
-            llbotWebUiToken.value = token;
-            Log.i('捕获到 LLBot Token: $token', tag: 'AstrBot');
+      // 捕获 LLBot WebUI Token
+      if (event.contains('token') || event.contains('Token') || event.contains('WebUI')) {
+        // LLBot WebUI Token 多种可能格式
+        final patterns = [
+          RegExp(r'[Ww]eb[Uu]i\s*[Tt]oken:\s*(\S+)'),
+          RegExp(r'[Tt]oken[=:]\s*(\w+)'),
+          RegExp(r'webui\?token=(\w+)'),
+        ];
+        for (final pattern in patterns) {
+          final match = pattern.firstMatch(event);
+          if (match != null) {
+            final token = match.group(1);
+            if (token != null && token.length > 4) {
+              llbotWebUiToken.value = token;
+              Log.i('捕获到 LLBot Token: $token', tag: 'AstrBot');
+              break;
+            }
           }
         }
       }
@@ -625,12 +635,12 @@ class HomeController extends GetxController {
     // 从持久化存储加载自定义 WebView 列表
     _loadCustomWebViews();
 
-    // 为 Google Play 上架做准备
-    // For Google Play
+    // 品牌开屏页（首次启动显示）
+    // 展示改版信息和隐私协议
     Future.delayed(Duration.zero, () async {
       if (privacySetting.get() == null) {
-        await Get.to(PrivacyAgreePage(
-          onAgreeTap: () {
+        await Get.to(LLBotIntroPage(
+          onContinue: () {
             privacySetting.set(true);
             Get.back();
           },

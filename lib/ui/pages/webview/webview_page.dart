@@ -168,10 +168,14 @@ class _WebViewPageState extends State<WebViewPage> {
         },
         onWebResourceError: (WebResourceError error) {
           debugPrint('AstrBot WebView error: ${error.description} (code: ${error.errorCode})');
-          // 网络错误时自动重试
-          if (error.errorCode == -2 ||  // ERROR_HOST_LOOKUP
-              error.errorCode == -6 ||  // ERROR_CONNECT
-              error.errorCode == -8) {  // ERROR_TIMEOUT
+          // 网络错误时自动重试（3 秒后刷新）
+          // WebView 常见网络错误码：-2=HOST_LOOKUP, -6=CONNECT_FAIL, -8=TIMEOUT
+          const kHostLookup = -2;
+          const kConnectFail = -6;
+          const kTimeout = -8;
+          if (error.errorCode == kHostLookup ||
+              error.errorCode == kConnectFail ||
+              error.errorCode == kTimeout) {
             Future.delayed(const Duration(seconds: 3), () {
               _astrBotController.loadRequest(Uri.parse('http://127.0.0.1:6185'));
             });
