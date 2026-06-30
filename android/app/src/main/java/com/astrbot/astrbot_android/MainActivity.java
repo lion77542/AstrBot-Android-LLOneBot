@@ -79,11 +79,14 @@ public class MainActivity extends FragmentActivity {
 
     private void applySustainedPerformance(boolean enable) {
         try {
-            if (powerManager != null && android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
-                powerManager.setSustainedPerformanceMode(enable);
+            if (powerManager != null && android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N
+                    && android.os.Build.VERSION.SDK_INT <= android.os.Build.VERSION_CODES.Q) {
+                // setSustainedPerformanceMode was removed in API 31+
+                powerManager.getClass().getMethod("setSustainedPerformanceMode", boolean.class)
+                        .invoke(powerManager, enable);
             }
         } catch (Throwable t) {
-            // ignore
+            // ignore - method not available on this API level
         }
     }
 
