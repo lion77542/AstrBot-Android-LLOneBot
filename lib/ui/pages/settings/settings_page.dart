@@ -714,7 +714,7 @@ class _SettingsPageState extends State<SettingsPage> {
 
   // 显示快速登录QQ对话框
   void _showQuickLoginDialog() async {
-    final webuiJsonPath = '${scripts.ubuntuPath}/root/napcat/config/webui.json';
+    final webuiJsonPath = '${scripts.ubuntuPath}/root/llbot/config/webui.json';
     final webuiJsonFile = File(webuiJsonPath);
 
     // 检查文件是否存在
@@ -1225,14 +1225,14 @@ class _SettingsPageState extends State<SettingsPage> {
         ),
         ListTile(
           leading: const Icon(Icons.refresh),
-          title: const Text('更新或重装 NapcatQQ'),
-          subtitle: const Text('清除 NapcatQQ 组件并重新安装最新版本'),
+          title: const Text('更新或重装 LLBot'),
+          subtitle: const Text('清除 LLBot 组件并重新安装最新版本'),
           onTap: () async {
             // 显示确认对话框
             final confirm = await Get.dialog<bool>(
               AlertDialog(
                 title: const Text('确认重新安装'),
-                content: const Text('此操作将删除 NapcatQQ 安装文件（保留配置文件）并重新安装，确定继续吗？'),
+                content: const Text('此操作将删除 LLBot 安装文件（保留配置文件）并重新安装，确定继续吗？'),
                 actions: [
                   TextButton(
                     onPressed: () => Get.back(result: false),
@@ -1273,7 +1273,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   });
                 }
               } catch (e) {
-                Log.e('重新安装 NapcatQQ 失败: $e', tag: 'AstrBot');
+                Log.e('重新安装 LLBot 失败: $e', tag: 'AstrBot');
                 if (context.mounted) {
                   Get.snackbar(
                     '重新安装失败',

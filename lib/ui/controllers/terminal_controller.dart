@@ -625,6 +625,23 @@ class HomeController extends GetxController {
         'source ${RuntimeEnvir.homePath}/common.sh\nstart_astrbot\n');
   }
 
+  // 应用生命周期观察者实例（用于统一 add/remove）
+  final LifecycleObserver _lifecycleObserver = LifecycleObserver(
+    onResume: () {
+      _isAppInForeground = true;
+      // 当应用回到前台且两个条件都满足但webview未打开时，打开webview
+      if (_isLocalhostDetected && _isQrcodeProcessed && !webviewHasOpen) {
+        Future.microtask(() {
+          Get.toNamed(AppRoutes.webview);
+          webviewHasOpen = true;
+        });
+      }
+    },
+    onPause: () {
+      _isAppInForeground = false;
+    },
+  );
+
   @override
   void onInit() {
     super.onInit();
@@ -673,23 +690,7 @@ class HomeController extends GetxController {
     });
 
     // 监听应用生命周期状态变化
-    WidgetsBinding.instance.addObserver(
-      LifecycleObserver(
-        onResume: () {
-          _isAppInForeground = true;
-          // 当应用回到前台且两个条件都满足但webview未打开时，打开webview
-          if (_isLocalhostDetected && _isQrcodeProcessed && !webviewHasOpen) {
-            Future.microtask(() {
-              Get.toNamed(AppRoutes.webview);
-              webviewHasOpen = true;
-            });
-          }
-        },
-        onPause: () {
-          _isAppInForeground = false;
-        },
-      ),
-    );
+    WidgetsBinding.instance.addObserver(_lifecycleObserver);
   }
 
   // 加载自定义 WebView 列表
@@ -790,13 +791,8 @@ class HomeController extends GetxController {
       Log.e('关闭终端进程时出错: $e', tag: 'AstrBot');
     }
 
-    // 移除生命周期观察者
-    WidgetsBinding.instance.removeObserver(
-      LifecycleObserver(
-        onResume: () {},
-        onPause: () {},
-      ),
-    );
+    // 移除生命周期观察者（必须用同一个实例才能移除）
+    WidgetsBinding.instance.removeObserver(_lifecycleObserver);
     super.onClose();
   }
 }

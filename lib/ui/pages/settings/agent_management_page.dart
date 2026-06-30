@@ -43,9 +43,9 @@ class _AgentManagementPageState extends State<AgentManagementPage> {
     // Send command with marker
     final fullCmd = '$cmd && echo "$marker"';
     homeController.pseudoTerminal!.write(utf8.encode('$fullCmd\n'));
-
     _outputSubscription = homeController.pseudoTerminal!.output
-         
+        .cast<List<int>>()
+        .transform(const Utf8Decoder(allowMalformed: true))
         .listen((event) {
       // Skip if it contains the marker
       if (event.contains(marker)) {
@@ -54,7 +54,7 @@ class _AgentManagementPageState extends State<AgentManagementPage> {
         }
         return;
       }
-      responses.add(String.fromCharCodes(event));
+      responses.add(event);
     });
 
     // Timeout after 5 seconds
