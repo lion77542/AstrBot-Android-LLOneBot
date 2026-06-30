@@ -26,6 +26,8 @@ class HomeController extends GetxController {
   SettingNode sustainedPerformance = 'sustained_performance'.setting;
   SettingNode llbotWebUiEnabled = 'llbot_webui_enabled'.setting;
   SettingNode showTerminalWhiteText = 'show_terminal_white_text'.setting;
+  SettingNode bigCoreAffinity = 'big_core_affinity'.setting;
+  SettingNode sustainedPerformance = 'sustained_performance'.setting;
   Pty? pseudoTerminal;
   Pty? llbotTerminal;
 
@@ -662,11 +664,10 @@ class HomeController extends GetxController {
       // 加载并启动 AstrBot
       loadAstrBot();
 
-      // 在终端创建完成后初始化固定标签页
-      // 等待terminal创建完成
-      Future.delayed(const Duration(milliseconds: 500), () {
-        terminalTabManager.initializeFixedTab(terminal);
-      });
+    // 在终端创建完成后初始化固定标签页
+    // 等待terminal创建完成
+    Future.delayed(const Duration(milliseconds: 500), () {
+      terminalTabManager.initializeFixedTab(terminal);
     });
 
     // 监听应用生命周期状态变化

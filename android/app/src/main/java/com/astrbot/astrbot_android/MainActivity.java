@@ -1,11 +1,13 @@
 package com.astrbot.astrbot_android;
 
 import android.app.Activity;
+import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.PowerManager;
 import android.view.ViewGroup;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
@@ -28,6 +30,7 @@ public class MainActivity extends FragmentActivity {
     private static final String TAG_FLUTTER_FRAGMENT = "flutter_fragment";
     Context mContext;
     FragmentManager fragmentManager = getSupportFragmentManager();
+    private PowerManager powerManager;
 
     // 文件选择器相关
     private static final int FILE_CHOOSER_REQUEST_CODE = 1;
@@ -42,6 +45,7 @@ public class MainActivity extends FragmentActivity {
         super.onCreate(savedInstanceState);
         mContext = this;
         setContentView(com.astrbot.astrbot_android.R.layout.my_activity_layout);
+        powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
 
         flutterFragment = (FlutterFragment) fragmentManager.findFragmentByTag(TAG_FLUTTER_FRAGMENT);
         FlutterEngine flutterEngine = new FlutterEngine(this, null, false);
@@ -49,6 +53,15 @@ public class MainActivity extends FragmentActivity {
         new MethodChannel(flutterEngine.getDartExecutor().getBinaryMessenger(), "astrbot_channel").setMethodCallHandler((call, result) -> {
             if ("lib_path".equals(call.method)) {
                 result.success(mContext.getApplicationContext().getApplicationInfo().nativeLibraryDir);
+            } else {
+                result.notImplemented();
+            }
+        });
+        new MethodChannel(flutterEngine.getDartExecutor().getBinaryMessenger(), "com.llbot.performance").setMethodCallHandler((call, result) -> {
+            if ("apply".equals(call.method)) {
+                boolean sustained = call.argument("sustainedPerformance") != null && (Boolean) call.argument("sustainedPerformance");
+                applySustainedPerformance(sustained);
+                result.success(true);
             } else {
                 result.notImplemented();
             }
@@ -62,6 +75,16 @@ public class MainActivity extends FragmentActivity {
                 .beginTransaction()
                 .add(com.astrbot.astrbot_android.R.id.fl_container, flutterFragment, TAG_FLUTTER_FRAGMENT)
                 .commit();
+    }
+
+    private void applySustainedPerformance(boolean enable) {
+        try {
+            if (powerManager != null && android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+                powerManager.setSustainedPerformanceMode(enable);
+            }
+        } catch (Throwable t) {
+            // ignore
+        }
     }
 
 

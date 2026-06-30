@@ -11,6 +11,7 @@ import '../settings/settings_page.dart';
 import '../terminal/terminal_tab_view.dart';
 import '../../navbar/bottom_nav_bar.dart';
 import '../../../core/services/password_manager.dart';
+import '../../../core/config/app_config.dart';
 
 class WebViewPage extends StatefulWidget {
   const WebViewPage({super.key});
@@ -177,7 +178,7 @@ class _WebViewPageState extends State<WebViewPage> {
               error.errorCode == kConnectFail ||
               error.errorCode == kTimeout) {
             Future.delayed(const Duration(seconds: 3), () {
-              _astrBotController.loadRequest(Uri.parse('http://127.0.0.1:6185'));
+              _astrBotController.loadRequest(Uri.parse(Config.astrBotLocalBaseUrl));
             });
           }
         },
@@ -185,7 +186,7 @@ class _WebViewPageState extends State<WebViewPage> {
     );
 
     // 在平台配置完成后加载页面（顺序修复 #10 白屏）
-    _astrBotController.loadRequest(Uri.parse('http://127.0.0.1:6185'));
+    _astrBotController.loadRequest(Uri.parse(Config.astrBotLocalBaseUrl));
 
     _astrBotController.addJavaScriptChannel(
       'Android',
@@ -231,17 +232,17 @@ class _WebViewPageState extends State<WebViewPage> {
     // 监听 Token 变化
     ever(homeController.llbotWebUiToken, (String token) {
       if (token.isNotEmpty) {
-        final url = 'http://127.0.0.1:3080/webui?token=$token';
+        final url = Config.llBotLocalBaseUrl + Config.llBotWebUiPath + '?token=$token';
         _llBotController.loadRequest(Uri.parse(url));
       }
     });
 
     // 初始加载 — LLBot WebUI 在 3080 端口
     if (homeController.llbotWebUiToken.isNotEmpty) {
-      final url = 'http://127.0.0.1:3080/webui?token=${homeController.llbotWebUiToken.value}';
+      final url = Config.llBotLocalBaseUrl + Config.llBotWebUiPath + '?token=${homeController.llbotWebUiToken.value}';
       _llBotController.loadRequest(Uri.parse(url));
     } else {
-      _llBotController.loadRequest(Uri.parse('http://127.0.0.1:3080'));
+      _llBotController.loadRequest(Uri.parse(Config.llBotLocalBaseUrl));
     }
 
     if (_llBotController.platform is AndroidWebViewController) {

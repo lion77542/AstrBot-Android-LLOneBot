@@ -17,13 +17,13 @@ import './agent_management_page.dart';
 
 class SettingsPage extends StatefulWidget {
   final WebViewController astrBotController;
-  final WebViewController llbotController;
+  final WebViewController napCatController;
   final Function(int) onNavigate;
 
   const SettingsPage({
     super.key,
     required this.astrBotController,
-    required this.llbotController,
+    required this.napCatController,
     required this.onNavigate,
   });
 
@@ -714,25 +714,64 @@ class _SettingsPageState extends State<SettingsPage> {
 
   // 显示快速登录QQ对话框
   void _showQuickLoginDialog() async {
-    // LLBot 自动登录通过启动脚本的 AUTO_LOGIN_QQ 环境变量控制
-    // 这里读取/写入一个简单的配置文件，由启动脚本读取
-    final autoLoginFile = File('${scripts.ubuntuPath}/root/llbot_auto_login.conf');
-    String currentQQ = '';
+    final webuiJsonPath = '${scripts.ubuntuPath}/root/napcat/config/webui.json';
+    final webuiJsonFile = File(webuiJsonPath);
 
-    if (await autoLoginFile.exists()) {
-      currentQQ = (await autoLoginFile.readAsString()).trim();
+    // 检查文件是否存在
+    if (!await webuiJsonFile.exists()) {
+      Get.snackbar(
+        '错误',
+        'webui.json 文件不存在',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+        duration: const Duration(seconds: 3),
+      );
+      return;
     }
 
+    // 读取并解析 JSON 文件
+    String currentQQ = '';
+    Map<String, dynamic> jsonData;
+    try {
+      final jsonContent = await webuiJsonFile.readAsString();
+      jsonData = jsonDecode(jsonContent) as Map<String, dynamic>;
+
+      // 检查是否存在 autoLoginAccount 字段
+      if (!jsonData.containsKey('autoLoginAccount')) {
+        Get.snackbar(
+          '错误',
+          '未找到 autoLoginAccount 字段',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+          duration: const Duration(seconds: 3),
+        );
+        return;
+      }
+
+      currentQQ = jsonData['autoLoginAccount']?.toString() ?? '';
+    } catch (e) {
+      Get.snackbar(
+        '错误',
+        '读取或解析 webui.json 失败: $e',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+        duration: const Duration(seconds: 3),
+      );
+      return;
+    }
+
+    // 显示编辑对话框
     final qqController = TextEditingController(text: currentQQ);
 
     final result = await Get.dialog<bool>(
       AlertDialog(
-        title: const Text('快速登录 QQ (LLBot)'),
+        title: const Text('快速登录 QQ'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text('设置自动登录的 QQ 号，重启 LLBot 后生效'),
-            const SizedBox(height: 12),
             TextField(
               controller: qqController,
               decoration: const InputDecoration(
@@ -757,13 +796,22 @@ class _SettingsPageState extends State<SettingsPage> {
       ),
     );
 
+    // 如果用户点击了保存
     if (result == true) {
       final newQQ = qqController.text.trim();
+
       try {
-        await autoLoginFile.writeAsString(newQQ);
+        // 更新 JSON 数据
+        jsonData['autoLoginAccount'] = newQQ;
+
+        // 写回文件
+        await webuiJsonFile.writeAsString(
+          const JsonEncoder.withIndent('    ').convert(jsonData),
+        );
+
         Get.snackbar(
           '保存成功',
-          '自动登录QQ号已设置为: $newQQ',
+          'QQ号已更新为: $newQQ',
           snackPosition: SnackPosition.BOTTOM,
           duration: const Duration(seconds: 2),
         );
@@ -771,13 +819,17 @@ class _SettingsPageState extends State<SettingsPage> {
       } catch (e) {
         Get.snackbar(
           '保存失败',
-          '写入配置文件失败: $e',
+          '写入 webui.json 失败: $e',
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: Colors.red,
           colorText: Colors.white,
+          duration: const Duration(seconds: 3),
         );
+        Log.e('保存自动登录QQ号失败: $e', tag: 'AstrBot');
       }
     }
+
+    qqController.dispose();
   }
 
   // 显示自定义 Git Clone 对话框
@@ -1173,14 +1225,14 @@ class _SettingsPageState extends State<SettingsPage> {
         ),
         ListTile(
           leading: const Icon(Icons.refresh),
-          title: const Text('更新或重装 LLBot'),
-          subtitle: const Text('清除 LLBot 组件并重新安装最新版本'),
+          title: const Text('更新或重装 NapcatQQ'),
+          subtitle: const Text('清除 NapcatQQ 组件并重新安装最新版本'),
           onTap: () async {
             // 显示确认对话框
             final confirm = await Get.dialog<bool>(
               AlertDialog(
                 title: const Text('确认重新安装'),
-                content: const Text('此操作将删除 LLBot 二进制文件（保留配置文件）并重新安装，确定继续吗？'),
+                content: const Text('此操作将删除 NapcatQQ 安装文件（保留配置文件）并重新安装，确定继续吗？'),
                 actions: [
                   TextButton(
                     onPressed: () => Get.back(result: false),
@@ -1199,29 +1251,29 @@ class _SettingsPageState extends State<SettingsPage> {
 
             if (confirm == true) {
               try {
-                // 删除 launcher.sh 和 llbot 二进制，触发重新安装
+                // 删除 launcher.sh 文件，这是安装判断的依据
                 final launcherPath = '${scripts.ubuntuPath}/root/launcher.sh';
                 final launcherFile = File(launcherPath);
                 if (await launcherFile.exists()) {
                   await launcherFile.delete();
-                }
-                // 删除 llbot 二进制以触发重新下载
-                final llbotDir = '${scripts.ubuntuPath}/root/llbot';
-                final llbotFile = File('$llbotDir/llbot');
-                if (await llbotFile.exists()) {
-                  await llbotFile.delete();
+                  Log.i('已删除 launcher.sh: $launcherPath', tag: 'AstrBot');
                 }
 
                 if (context.mounted) {
                   Get.snackbar(
-                    '重装触发',
-                    'LLBot 将在下次启动时重新安装',
+                    '重装成功',
+                    '应用将自动退出，请重新启动',
                     snackPosition: SnackPosition.BOTTOM,
                     duration: const Duration(seconds: 2),
                   );
+
+                  // 2秒后自动退出应用
+                  Future.delayed(const Duration(seconds: 2), () {
+                    exit(0);
+                  });
                 }
               } catch (e) {
-                Log.e('重新安装 LLBot 失败: $e', tag: 'AstrBot');
+                Log.e('重新安装 NapcatQQ 失败: $e', tag: 'AstrBot');
                 if (context.mounted) {
                   Get.snackbar(
                     '重新安装失败',
@@ -1525,17 +1577,17 @@ class _SettingsPageState extends State<SettingsPage> {
         ),
         ListTile(
           leading: const Icon(Icons.web),
-          title: const Text('LLBot WebUI'),
-          subtitle: const Text('显示或隐藏 LLBot 网页控制面板（默认隐藏）'),
+          title: const Text('NapCat WebUI'),
+          subtitle: const Text('显示或隐藏 NapCat 网页控制面板（默认隐藏）'),
           trailing: Switch(
-            value: homeController.llbotWebUiEnabled.get() ?? false,
+            value: homeController.napCatWebUiEnabled.get() ?? false,
             onChanged: (bool value) {
               // 使用新的方法来同步更新响应式变量
-              homeController.setLLBotWebUiEnabled(value);
+              homeController.setNapCatWebUiEnabled(value);
 
               Get.snackbar(
                 value ? 'WebUI 已启用' : 'WebUI 已禁用',
-                value ? 'LLBot 标签页已显示，可以立即访问控制面板' : 'LLBot 标签页已隐藏',
+                value ? 'NapCat 标签页已显示，可以立即访问控制面板' : 'NapCat 标签页已隐藏',
                 snackPosition: SnackPosition.BOTTOM,
                 duration: const Duration(seconds: 2),
               );
@@ -1543,15 +1595,15 @@ class _SettingsPageState extends State<SettingsPage> {
           ),
         ),
         Obx(() {
-          final token = homeController.llbotWebUiToken.value;
+          final token = homeController.napCatWebUiToken.value;
           return ListTile(
             leading: const Icon(Icons.vpn_key),
-            title: const Text('LLBot WebUI 地址'),
-            subtitle: Text(token.isEmpty ? 'http://127.0.0.1:3080' : 'http://127.0.0.1:3080/webui?token=$token'),
+            title: const Text('NapCat 登录 token'),
+            subtitle: Text(token.isEmpty ? '暂未获取到token' : token),
             onTap: token.isEmpty
                 ? null
                 : () async {
-                    final fullUrl = 'http://127.0.0.1:3080/webui?token=$token';
+                    final fullUrl = 'http://localhost:6099/webui?token=$token';
                     await Clipboard.setData(ClipboardData(text: fullUrl));
                     Get.snackbar(
                       '已复制',
@@ -1610,7 +1662,7 @@ class _SettingsPageState extends State<SettingsPage> {
           onTap: () async {
             try {
               await widget.astrBotController.clearCache();
-              await widget.llbotController.clearCache();
+              await widget.napCatController.clearCache();
               await PasswordManager.clearAllPasswords();
               if (context.mounted) {
                 Get.snackbar(
