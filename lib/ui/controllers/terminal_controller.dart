@@ -625,22 +625,7 @@ class HomeController extends GetxController {
         'source ${RuntimeEnvir.homePath}/common.sh\nstart_astrbot\n');
   }
 
-  // 应用生命周期观察者实例（用于统一 add/remove）
-  final LifecycleObserver _lifecycleObserver = LifecycleObserver(
-    onResume: () {
-      _isAppInForeground = true;
-      // 当应用回到前台且两个条件都满足但webview未打开时，打开webview
-      if (_isLocalhostDetected && _isQrcodeProcessed && !webviewHasOpen) {
-        Future.microtask(() {
-          Get.toNamed(AppRoutes.webview);
-          webviewHasOpen = true;
-        });
-      }
-    },
-    onPause: () {
-      _isAppInForeground = false;
-    },
-  );
+  LifecycleObserver? _lifecycleObserver;
 
   @override
   void onInit() {
@@ -689,8 +674,23 @@ class HomeController extends GetxController {
       terminalTabManager.initializeFixedTab(terminal);
     });
 
-    // 监听应用生命周期状态变化
-    WidgetsBinding.instance.addObserver(_lifecycleObserver);
+    // 监听应用生命周期状态变化（保存实例引用以便正确移除）
+    _lifecycleObserver = LifecycleObserver(
+      onResume: () {
+        _isAppInForeground = true;
+        // 当应用回到前台且两个条件都满足但webview未打开时，打开webview
+        if (_isLocalhostDetected && _isQrcodeProcessed && !webviewHasOpen) {
+          Future.microtask(() {
+            Get.toNamed(AppRoutes.webview);
+            webviewHasOpen = true;
+          });
+        }
+      },
+      onPause: () {
+        _isAppInForeground = false;
+      },
+    );
+    WidgetsBinding.instance.addObserver(_lifecycleObserver!);
   }
 
   // 加载自定义 WebView 列表
