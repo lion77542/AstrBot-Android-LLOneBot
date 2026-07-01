@@ -8,7 +8,7 @@ class PerformancePromptPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Obx(() {
-      final homeController = HomeController.to;
+      final homeController = Get.find<HomeController>();
       return Scaffold(
         backgroundColor: const Color(0xFF1a1a2e),
         body: SafeArea(
